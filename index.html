@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Lista de Personagens</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+    }
+
+    .filters {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .filters label {
+      margin: 0 10px;
+      font-weight: bold;
+    }
+
+    .character-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .character-card {
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      width: 200px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .character-card img {
+      width: 100%;
+      border-radius: 4px;
+    }
+
+    .tags {
+      margin-top: 10px;
+      font-size: 0.9em;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <h1>Lista de Personagens</h1>
+
+  <div class="filters">
+    <label><input type="checkbox" value="Kemonomimi" /> Kemonomimi</label>
+    <label><input type="checkbox" value="ZZZ" /> ZZZ</label>
+    <label><input type="checkbox" value="Gacha" /> Gacha</label>
+    <label><input type="checkbox" value="Shorts" /> Shorts</label>
+  </div>
+
+  <div class="character-list" id="characterList"></div>
+
+  <script>
+    const characters = [
+      {
+        name: "Ju Fufu",
+        image: "https://mudae.net/uploads/5123740/CRJQHbg~7kzcao6v9b7.png",
+        tags: ["Kemonomimi", "ZZZ", "Gacha", "Shorts"]
+      }
+    ];
+
+    const characterList = document.getElementById("characterList");
+    const checkboxes = document.querySelectorAll(".filters input");
+
+    function renderCharacters() {
+      const selectedTags = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
+
+      characterList.innerHTML = "";
+
+      characters.forEach(char => {
+        if (selectedTags.length > 0 && !selectedTags.every(tag => char.tags.includes(tag))) {
+          return;
+        }
+
+        const card = document.createElement("div");
+        card.className = "character-card";
+
+        card.innerHTML = `
+          <img src="${char.image}" alt="${char.name}">
+          <h3>${char.name}</h3>
+          <div class="tags">${char.tags.join(", ")}</div>
+        `;
+
+        characterList.appendChild(card);
+      });
+    }
+
+    checkboxes.forEach(cb => cb.addEventListener("change", renderCharacters));
+    renderCharacters();
+  </script>
+</body>
+</html>
