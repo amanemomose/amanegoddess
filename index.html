@@ -609,45 +609,37 @@
       });
 
       document.querySelectorAll(".rank-input").forEach(input => {
-  input.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      const i = parseInt(e.target.getAttribute("data-index"));
-      const newRank = parseInt(e.target.value);
+  input.addEventListener("blur", (e) => {
+    const i = parseInt(e.target.getAttribute("data-index"));
+    const newRank = parseInt(e.target.value);
 
-      if (isNaN(newRank)) return;
+    if (isNaN(newRank)) return;
 
-      const currentRanks = characters.map((c, idx) => ({ idx, rank: c.rank }));
-      const oldRank = characters[i].rank;
+    const currentRank = characters[i].rank;
 
-      if (newRank === oldRank) return;
+    if (newRank === currentRank) return;
 
-      // Só queremos alterar se o novo rank já existir em outro personagem
-      const affected = currentRanks
+    // Detecta colisão e ajusta os rankings
+    const takenRanks = characters.map(c => c.rank);
+    if (takenRanks.includes(newRank)) {
+      // Ordena do maior para o menor para evitar sobreposição reversa
+      const sorted = characters
+        .map((c, idx) => ({ ...c, idx }))
         .filter(c => c.idx !== i && c.rank >= newRank)
-        .sort((a, b) => a.rank - b.rank);
+        .sort((a, b) => b.rank - a.rank);
 
-      let usedRanks = new Set();
-      characters.forEach(c => usedRanks.add(c.rank));
-      if (usedRanks.has(newRank)) {
-        for (let c of affected) {
-          if (characters[c.idx].rank === newRank) {
-            characters[c.idx].rank += 1;
-            newRank++;
-          } else if (characters[c.idx].rank === newRank) {
-            characters[c.idx].rank += 1;
-            newRank++;
-          } else {
-            break;
-          }
-          savedRanks[characters[c.idx].name] = characters[c.idx].rank;
-        }
-      }
-
-      characters[i].rank = newRank;
-      savedRanks[characters[i].name] = newRank;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-      sortByRank(); // Reordena após ajuste
+      sorted.forEach(c => {
+        characters[c.idx].rank += 1;
+        savedRanks[characters[c.name]] = characters[c.idx].rank;
+      });
     }
+
+    // Atualiza o ranking do personagem alterado
+    characters[i].rank = newRank;
+    savedRanks[characters[i].name] = newRank;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+
+    renderCharacters();
   });
 });
     }
