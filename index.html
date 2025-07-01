@@ -775,6 +775,17 @@
     const characterList = document.getElementById("characterList");
     const checkboxes = document.querySelectorAll(".filters input");
 
+    const savedRanks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+characters.forEach(char => {
+  const saved = savedRanks[char.name];
+  char.rank = Number.isInteger(saved) ? saved : char.rank;
+
+  ["rarity", "smell", "noise", "frequency"].forEach(attr => {
+    const val = savedRanks[`${attr}_${char.name}`];
+    if (Number.isInteger(val)) char[attr] = val;
+  });
+});
+    
     function renderCharacters() {
       const selectedTags = Array.from(checkboxes)
         .filter(cb => cb.checked)
@@ -798,13 +809,26 @@
                 <input type="number" class="rank-input" value="${char.rank}" data-index="${index}" />
               </label>
             </div>
-            <div class="rarity" data-index="${index}">
-               <strong>Raridade:</strong>
-               ${[1, 2, 3, 4, 5].map(n => `
-                 <span class="star${n <= char.rarity ? ' active' : ''}" data-star="${n}">&#9733;</span>
-               `).join("")}
-            </div>
-          </div>`;
+            <div class="rating-block" data-index="${index}">
+  <div class="rarity-group">
+    <strong>Smell:</strong>
+    ${[1, 2, 3, 4, 5].map(n => `
+      <span class="star smell${n <= (char.smell || 0) ? ' active' : ''}" data-type="smell" data-star="${n}">&#9733;</span>
+    `).join("")}
+  </div>
+  <div class="rarity-group">
+    <strong>Noise:</strong>
+    ${[1, 2, 3, 4, 5].map(n => `
+      <span class="star noise${n <= (char.noise || 0) ? ' active' : ''}" data-type="noise" data-star="${n}">&#9733;</span>
+    `).join("")}
+  </div>
+  <div class="rarity-group">
+    <strong>Frequency:</strong>
+    ${[1, 2, 3, 4, 5].map(n => `
+      <span class="star frequency${n <= (char.frequency || 0) ? ' active' : ''}" data-type="frequency" data-star="${n}">&#9733;</span>
+    `).join("")}
+  </div>
+</div>;
 
         characterList.appendChild(card);
 
