@@ -89,6 +89,18 @@
       padding: 4px;
       text-align: center;
     }
+   .rarity {
+     margin-top: 10px;
+     font-size: 1.2em;
+   }
+   .star {
+    cursor: pointer;
+    color: #bbb; /* cor da estrela apagada */
+    transition: color 0.2s;
+   }
+  .star.active {
+   color: gold; /* estrela preenchida */
+   }
   </style>
 </head>
 <body>
@@ -184,6 +196,7 @@
         image: "fufu.png", // Caminho relativo
         tags: ["Kemonomimi", "ZZZ", "Game", "Gacha", "Shorts", "Long hair", "Orange hair", "Small boobs", "Game", "Hoyo"],
         rank: 0
+        rarity: 3
       },
       {
         name: "C.C.",
@@ -787,6 +800,11 @@
                 <input type="number" class="rank-input" value="${char.rank}" data-index="${index}" />
               </label>
             </div>
+            <div class="rarity" data-index="${index}">
+               <strong>Raridade:</strong>
+               ${[1, 2, 3, 4, 5].map(n => `
+                 <span class="star" data-star="${n}">&#9733;</span>
+               `).join("")}
           </div>
         `;
 
@@ -852,7 +870,28 @@
   });
   renderCharacters();
 }
+   document.querySelectorAll(".rarity").forEach(div => {
+  const i = parseInt(div.getAttribute("data-index"));
+  const stars = div.querySelectorAll(".star");
 
+  // Aplica visual
+  stars.forEach((star, idx) => {
+    if (idx < characters[i].rarity) {
+      star.classList.add("active");
+    } else {
+      star.classList.remove("active");
+    }
+
+    // Clique para mudar a raridade
+    star.addEventListener("click", () => {
+      characters[i].rarity = idx + 1;
+      savedRanks[characters[i].name] = characters[i].rank;
+      savedRanks["rarity_" + characters[i].name] = characters[i].rarity;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+      renderCharacters();
+    });
+  });
+});
     checkboxes.forEach(cb => cb.addEventListener("change", renderCharacters));
     renderCharacters();
   </script>
