@@ -89,36 +89,18 @@
       padding: 4px;
       text-align: center;
     }
-
-    .rating-group {
-      margin-top: 10px;
-    }
-
-    .rating-group strong {
-      display: block;
-      margin-bottom: 5px;
-    }
-
-    .star {
-      cursor: pointer;
-      color: #bbb;
-      font-size: 20px;
-      display: inline-block;
-      width: 12px;
-      position: relative;
-    }
-
-    .star.full {
-      color: gold;
-    }
-
-    .star.half::before {
-      content: '\2605';
-      position: absolute;
-      width: 50%;
-      overflow: hidden;
-      color: gold;
-    }
+   .rarity {
+     margin-top: 10px;
+     font-size: 1.2em;
+   }
+   .star {
+    cursor: pointer;
+    color: #bbb; /* cor da estrela apagada */
+    transition: color 0.2s;
+   }
+  .star.active {
+   color: gold; /* estrela preenchida */
+   }
   </style>
 </head>
 <body>
@@ -195,8 +177,6 @@
       <label><input type="checkbox" value="YTTD" /> YTTD</label>
       <label><input type="checkbox" value="Zero Escape" /> Zero Escape</label>
       <label><input type="checkbox" value="Pokémon" /> Pokémon</label>
-      <label><input type="checkbox" value="Kemono Friends" /> Kemono Friends</label>
-      <label><input type="checkbox" value="NIKKE" /> NIKKE</label>
   </div>
 
   <div class="sort-controls">
@@ -215,9 +195,7 @@
         image: "fufu.png", // Caminho relativo
         tags: ["Kemonomimi", "ZZZ", "Game", "Gacha", "Shorts", "Long hair", "Orange hair", "Small boobs", "Game", "Hoyo"],
         rank: 0,
-        smell: 0,
-        noise: 0,
-        frequency: 0
+        rarity: 3
       },
       {
         name: "C.C.",
@@ -784,95 +762,120 @@
         rank: 0
       }
     ];
+
         // Carrega rankings salvos do localStorage
     const savedRanks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     characters.forEach(char => {
       const saved = savedRanks[char.name];
       char.rank = Number.isInteger(saved) ? saved : char.rank;
-      char.smell = savedRanks[`smell_${char.name}`] || 0;
-      char.noise = savedRanks[`noise_${char.name}`] || 0;
-      char.frequency = savedRanks[`frequency_${char.name}`] || 0;
+      const savedRarity = savedRanks["rarity_" + char.name];
+      if (Number.isInteger(savedRarity)) char.rarity = savedRarity;
     });
 
     const characterList = document.getElementById("characterList");
     const checkboxes = document.querySelectorAll(".filters input");
 
-    function renderRatingGroup(label, value, key, charIndex) {
-      let html = `<div class="rating-group" data-key="${key}" data-index="${charIndex}">
-        <strong>${label}:</strong>`;
-      for (let i = 1; i <= 10; i++) {
-        const isFull = i <= value * 2;
-        const isHalf = i === Math.ceil(value * 2);
-        html += `<span class="star${isFull ? ' full' : isHalf ? ' half' : ''}" data-value="${i / 2}">&#9733;</span>`;
-      }
-      html += `</div>`;
-      return html;
-    }
-    
     function renderCharacters() {
-  const selectedTags = Array.from(document.querySelectorAll(".filters input"))
-    .filter(cb => cb.checked)
-    .map(cb => cb.value);
+      const selectedTags = Array.from(checkboxes)
+        .filter(cb => cb.checked)
+        .map(cb => cb.value);
 
-  const container = document.getElementById("characterList");
-  container.innerHTML = "";
+      characterList.innerHTML = "";
 
-  characters.forEach((char, index) => {
-    if (selectedTags.length && !selectedTags.every(tag => char.tags.includes(tag))) return;
+      characters.forEach((char, index) => {
+        if (selectedTags.length > 0 && !selectedTags.every(tag => char.tags.includes(tag))) return;
 
-    const card = document.createElement("div");
-    card.className = "character-card";
-    card.innerHTML = `
-      <img src="${char.image}" alt="${char.name}">
-      <h3>${char.name}</h3>
-      <div class="hover-info">
-        <div class="tags"><strong>Tags:</strong> ${char.tags.join(", ")}</div>
-        <div>
-          <label>Ranking:
-            <input type="number" class="rank-input" value="${char.rank}" data-index="${index}" />
-          </label>
-        </div>
-        ${renderRatingGroup("Smell", char.smell, "smell", index)}
-        ${renderRatingGroup("Noise", char.noise, "noise", index)}
-        ${renderRatingGroup("Frequency", char.frequency, "frequency", index)}
-      </div>
-    `;
-    container.appendChild(card);
-  });
+        const card = document.createElement("div");
+        card.className = "character-card";
 
-  document.querySelectorAll(".star").forEach(star => {
-    star.addEventListener("click", e => {
-      const parent = e.target.closest(".rating-group");
-      const key = parent.dataset.key;
-      const index = parseInt(parent.dataset.index);
-      const value = parseFloat(e.target.dataset.value);
-      characters[index][key] = value;
-      savedRanks[`${key}_${characters[index].name}`] = value;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+        card.innerHTML = `
+          <img src="${char.image}" alt="${char.name}">
+          <h3>${char.name}</h3>
+          <div class="hover-info">
+            <div class="tags"><strong>Tags:</strong> ${char.tags.join(", ")}</div>
+            <div>
+              <label>Ranking:
+                <input type="number" class="rank-input" value="${char.rank}" data-index="${index}" />
+              </label>
+            </div>
+            <div class="rarity" data-index="${index}">
+               <strong>Raridade:</strong>
+               ${[1, 2, 3, 4, 5].map(n => `
+                 <span class="star${n <= char.rarity ? ' active' : ''}" data-star="${n}">&#9733;</span>
+               `).join("")}
+            </div>
+          </div>`;
+
+        characterList.appendChild(card);
+
+        // Interatividade de estrelas
+        const rarityDiv = card.querySelector(".rarity");
+        const i = parseInt(rarityDiv.getAttribute("data-index"));
+        const stars = rarityDiv.querySelectorAll(".star");
+
+        stars.forEach((star, idx) => {
+          star.addEventListener("click", () => {
+            characters[i].rarity = idx + 1;
+            savedRanks[characters[i].name] = characters[i].rank;
+            savedRanks["rarity_" + characters[i].name] = characters[i].rarity;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+            renderCharacters();
+          });
+        });
+      });
+
+      document.querySelectorAll(".rank-input").forEach(input => {
+        input.addEventListener("blur", (e) => {
+          const i = parseInt(e.target.getAttribute("data-index"));
+          const newRank = parseInt(e.target.value);
+          if (isNaN(newRank) || newRank < 0) return;
+
+          const currentRank = characters[i].rank;
+          if (newRank === currentRank) return;
+
+          const rankSnapshot = characters.map(c => ({ name: c.name, rank: c.rank }));
+
+          if (newRank < currentRank) {
+            for (let r = newRank; r < currentRank; r++) {
+              const targetData = rankSnapshot.find(c => c.rank === r);
+              const target = characters.find(c => c.name === targetData?.name);
+              if (target) {
+                target.rank += 1;
+                savedRanks[target.name] = target.rank;
+              }
+            }
+          } else {
+            for (let r = newRank; r > currentRank; r--) {
+              const targetData = rankSnapshot.find(c => c.rank === r);
+              const target = characters.find(c => c.name === targetData?.name);
+              if (target) {
+                target.rank -= 1;
+                savedRanks[target.name] = target.rank;
+              }
+            }
+          }
+
+          characters[i].rank = newRank;
+          savedRanks[characters[i].name] = newRank;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+
+          if (typeof currentSortOrder !== "undefined") {
+            sortByRank(currentSortOrder);
+          } else {
+            renderCharacters();
+          }
+        });
+      });
+    }
+
+    function sortByRank(order = 'asc') {
+      currentSortOrder = order;
+      characters.sort((a, b) => order === 'asc' ? a.rank - b.rank : b.rank - a.rank);
       renderCharacters();
-    });
-  });
+    }
 
-  document.querySelectorAll(".rank-input").forEach(input => {
-    input.addEventListener("blur", e => {
-      const i = parseInt(e.target.dataset.index);
-      const newRank = parseInt(e.target.value);
-      if (isNaN(newRank) || newRank < 0) return;
-      characters[i].rank = newRank;
-      savedRanks[characters[i].name] = newRank;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-      renderCharacters();
-    });
-  });
-}
-
-function sortByRank(order = 'asc') {
-  characters.sort((a, b) => order === 'asc' ? a.rank - b.rank : b.rank - a.rank);
-  renderCharacters();
-}
-
-document.querySelectorAll(".filters input").forEach(cb => cb.addEventListener("change", renderCharacters));
-renderCharacters();
+    checkboxes.forEach(cb => cb.addEventListener("change", renderCharacters));
+    renderCharacters();
   </script>
 </body>
 </html>
