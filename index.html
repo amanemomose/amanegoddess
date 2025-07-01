@@ -119,8 +119,6 @@
       <label><input type="checkbox" value="Kimono" /> Kimono</label>
       <label><input type="checkbox" value="Glasses" /> Glasses</label>
       <label><input type="checkbox" value="Overalls" /> Overalls</label>
-      <label><input type="checkbox" value="Mommy" /> Mommy</label>
-      <label><input type="checkbox" value="Loli" /> Loli</label>
       <label><input type="checkbox" value="Pointy ears" /> Pointy ears</label>
       <label><input type="checkbox" value="Tanned" /> Tanned</label>
       <label><input type="checkbox" value="Skirt" /> Skirt</label>
@@ -131,6 +129,8 @@
       <label><input type="checkbox" value="Shy" /> Shy</label>
       <label><input type="checkbox" value="Kuudere" /> Kuudere</label>
       <label><input type="checkbox" value="Tsundere" /> Tsundere</label>
+      <label><input type="checkbox" value="Mommy" /> Mommy</label>
+      <label><input type="checkbox" value="Loli" /> Loli</label>
     </div>
     <div class="filter-group">
       <h3>Mídia</h3>
@@ -617,9 +617,13 @@
     const currentRank = characters[i].rank;
     if (newRank === currentRank) return;
 
+    // 🧠 Clona os rankings atuais antes de mudar qualquer coisa
+    const rankSnapshot = characters.map(c => ({ name: c.name, rank: c.rank }));
+
     if (newRank < currentRank) {
       for (let r = newRank; r < currentRank; r++) {
-        const target = characters.find(c => c.rank === r);
+        const targetData = rankSnapshot.find(c => c.rank === r);
+        const target = characters.find(c => c.name === targetData?.name);
         if (target) {
           target.rank += 1;
           savedRanks[target.name] = target.rank;
@@ -629,7 +633,8 @@
       }
     } else if (newRank > currentRank) {
       for (let r = newRank; r > currentRank; r--) {
-        const target = characters.find(c => c.rank === r);
+        const targetData = rankSnapshot.find(c => c.rank === r);
+        const target = characters.find(c => c.name === targetData?.name);
         if (target) {
           target.rank -= 1;
           savedRanks[target.name] = target.rank;
@@ -639,6 +644,7 @@
       }
     }
 
+    // Só altera o personagem depois de tudo resolvido
     characters[i].rank = newRank;
     savedRanks[characters[i].name] = newRank;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
