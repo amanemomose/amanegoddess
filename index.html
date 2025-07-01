@@ -774,17 +774,6 @@
 
     const characterList = document.getElementById("characterList");
     const checkboxes = document.querySelectorAll(".filters input");
-
-    const savedRanks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
-characters.forEach(char => {
-  const saved = savedRanks[char.name];
-  char.rank = Number.isInteger(saved) ? saved : char.rank;
-
-  ["rarity", "smell", "noise", "frequency"].forEach(attr => {
-    const val = savedRanks[`${attr}_${char.name}`];
-    if (Number.isInteger(val)) char[attr] = val;
-  });
-});
     
     function renderCharacters() {
       const selectedTags = Array.from(checkboxes)
