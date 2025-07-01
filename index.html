@@ -766,9 +766,11 @@
         // Carrega rankings salvos do localStorage
     const savedRanks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     characters.forEach(char => {
-  const saved = savedRanks[char.name];
-  char.rank = Number.isInteger(saved) ? saved : char.rank;
-});
+      const saved = savedRanks[char.name];
+      char.rank = Number.isInteger(saved) ? saved : char.rank;
+      const savedRarity = savedRanks["rarity_" + char.name];
+      if (Number.isInteger(savedRarity)) char.rarity = savedRarity;
+    });
 
     const characterList = document.getElementById("characterList");
     const checkboxes = document.querySelectorAll(".filters input");
@@ -781,9 +783,7 @@
       characterList.innerHTML = "";
 
       characters.forEach((char, index) => {
-        if (selectedTags.length > 0 && !selectedTags.every(tag => char.tags.includes(tag))) {
-          return;
-        }
+        if (selectedTags.length > 0 && !selectedTags.every(tag => char.tags.includes(tag))) return;
 
         const card = document.createElement("div");
         card.className = "character-card";
@@ -791,7 +791,6 @@
         card.innerHTML = `
           <img src="${char.image}" alt="${char.name}">
           <h3>${char.name}</h3>
-
           <div class="hover-info">
             <div class="tags"><strong>Tags:</strong> ${char.tags.join(", ")}</div>
             <div>
@@ -802,93 +801,79 @@
             <div class="rarity" data-index="${index}">
                <strong>Raridade:</strong>
                ${[1, 2, 3, 4, 5].map(n => `
-                 <span class="star" data-star="${n}">&#9733;</span>
+                 <span class="star${n <= char.rarity ? ' active' : ''}" data-star="${n}">&#9733;</span>
                `).join("")}
-          </div>
-        `;
+            </div>
+          </div>`;
 
         characterList.appendChild(card);
 
-         // ⭐️ Adiciona interatividade nas estrelas de raridade
-      const rarityDiv = card.querySelector(".rarity");
-      const i = parseInt(rarityDiv.getAttribute("data-index"));
-      const stars = rarityDiv.querySelectorAll(".star");
+        // Interatividade de estrelas
+        const rarityDiv = card.querySelector(".rarity");
+        const i = parseInt(rarityDiv.getAttribute("data-index"));
+        const stars = rarityDiv.querySelectorAll(".star");
 
-      stars.forEach((star, idx) => {
-        if (idx < characters[i].rarity) {
-          star.classList.add("active");
-        } else {
-          star.classList.remove("active");
-        }
-
-        star.addEventListener("click", () => {
-          characters[i].rarity = idx + 1;
-          savedRanks[characters[i].name] = characters[i].rank;
-          savedRanks["rarity_" + characters[i].name] = characters[i].rarity;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-          renderCharacters();
+        stars.forEach((star, idx) => {
+          star.addEventListener("click", () => {
+            characters[i].rarity = idx + 1;
+            savedRanks[characters[i].name] = characters[i].rank;
+            savedRanks["rarity_" + characters[i].name] = characters[i].rarity;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+            renderCharacters();
+          });
         });
       });
 
       document.querySelectorAll(".rank-input").forEach(input => {
-  input.addEventListener("blur", (e) => {
-    const i = parseInt(e.target.getAttribute("data-index"));
-    const newRank = parseInt(e.target.value);
+        input.addEventListener("blur", (e) => {
+          const i = parseInt(e.target.getAttribute("data-index"));
+          const newRank = parseInt(e.target.value);
+          if (isNaN(newRank) || newRank < 0) return;
 
-    if (isNaN(newRank) || newRank < 0) return;
+          const currentRank = characters[i].rank;
+          if (newRank === currentRank) return;
 
-    const currentRank = characters[i].rank;
-    if (newRank === currentRank) return;
+          const rankSnapshot = characters.map(c => ({ name: c.name, rank: c.rank }));
 
-    // 🧠 Clona os rankings atuais antes de mudar qualquer coisa
-    const rankSnapshot = characters.map(c => ({ name: c.name, rank: c.rank }));
+          if (newRank < currentRank) {
+            for (let r = newRank; r < currentRank; r++) {
+              const targetData = rankSnapshot.find(c => c.rank === r);
+              const target = characters.find(c => c.name === targetData?.name);
+              if (target) {
+                target.rank += 1;
+                savedRanks[target.name] = target.rank;
+              }
+            }
+          } else {
+            for (let r = newRank; r > currentRank; r--) {
+              const targetData = rankSnapshot.find(c => c.rank === r);
+              const target = characters.find(c => c.name === targetData?.name);
+              if (target) {
+                target.rank -= 1;
+                savedRanks[target.name] = target.rank;
+              }
+            }
+          }
 
-    if (newRank < currentRank) {
-      for (let r = newRank; r < currentRank; r++) {
-        const targetData = rankSnapshot.find(c => c.rank === r);
-        const target = characters.find(c => c.name === targetData?.name);
-        if (target) {
-          target.rank += 1;
-          savedRanks[target.name] = target.rank;
-        } else {
-          break;
-        }
-      }
-    } else if (newRank > currentRank) {
-      for (let r = newRank; r > currentRank; r--) {
-        const targetData = rankSnapshot.find(c => c.rank === r);
-        const target = characters.find(c => c.name === targetData?.name);
-        if (target) {
-          target.rank -= 1;
-          savedRanks[target.name] = target.rank;
-        } else {
-          break;
-        }
-      }
+          characters[i].rank = newRank;
+          savedRanks[characters[i].name] = newRank;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+
+          if (typeof currentSortOrder !== "undefined") {
+            sortByRank(currentSortOrder);
+          } else {
+            renderCharacters();
+          }
+        });
+      });
     }
-
-    // Só altera o personagem depois de tudo resolvido
-    characters[i].rank = newRank;
-    savedRanks[characters[i].name] = newRank;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-
-    if (typeof currentSortOrder !== "undefined") {
-      sortByRank(currentSortOrder);
-    } else {
-      renderCharacters();
-    }
-  });
-});
-}
 
     function sortByRank(order = 'asc') {
-  currentSortOrder = order; // Salva a ordem atual
-  characters.sort((a, b) => {
-    if (order === 'asc') return a.rank - b.rank;
-    else return b.rank - a.rank;
-  });
-  renderCharacters();
-}
+      currentSortOrder = order;
+      characters.sort((a, b) => order === 'asc' ? a.rank - b.rank : b.rank - a.rank);
+      renderCharacters();
+    }
+
     checkboxes.forEach(cb => cb.addEventListener("change", renderCharacters));
     renderCharacters();
   </script>
