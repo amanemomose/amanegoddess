@@ -815,7 +815,29 @@
       }
       return html;
     }
-    
+    function addStarEvents() {
+  document.querySelectorAll(".rarity-stars .star").forEach(star => {
+    star.addEventListener("click", (e) => {
+      const category = star.getAttribute("data-category");
+      const index = parseInt(star.getAttribute("data-index"));
+      const starValue = parseInt(star.getAttribute("data-value"));
+
+      const rect = star.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const isHalf = clickX < rect.width / 2;
+
+      let newValue = isHalf ? starValue - 1 : starValue;
+
+      characters[index][category] = newValue;
+
+      savedRanks[category + "_" + characters[index].name] = newValue;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+
+      renderCharacters(); // Vai re-renderizar tudo
+      addStarEvents();    // PRECISA reatribuir os eventos novamente
+    });
+  });
+}
     function renderCharacters() {
       const selectedTags = Array.from(checkboxes)
         .filter(cb => cb.checked)
@@ -856,6 +878,8 @@
               <div class="rarity-label">Frequency:</div>
               <div class="rarity-stars" data-category="frequency" data-index="${index}">
                 ${createStarsHTML("frequency", char.frequency, index)}
+                
+                addStarEvents(); // ativa eventos após renderização
               </div>
             </div>
           </div>
