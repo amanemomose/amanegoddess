@@ -1,172 +1,4 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <title>Lista de Personagens</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      margin: 0;
-      padding: 20px;
-    }
 
-    h1 {
-      text-align: center;
-    }
-
-    .filters {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .filters label, .sort-controls button {
-      margin: 0 10px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .sort-controls {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .character-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      justify-content: center;
-    }
-
-    .character-card {
-      background: white;
-      border-radius: 8px;
-      padding: 10px;
-      width: 200px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      text-align: center;
-      position: relative;
-      overflow: visible;
-    }
-
-    .character-card img {
-      width: 100%;
-      border-radius: 4px;
-      transition: transform 0.3s ease;
-    }
-
-    .character-card:hover img {
-      transform: scale(1.2);
-      z-index: 2;
-    }
-
-    .hover-info {
-      display: none;
-      position: absolute;
-      top: 10px;
-      left: 210px;
-      width: 200px;
-      background: #ffffffdd;
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 8px;
-      z-index: 3;
-      box-shadow: 2px 2px 10px rgba(0,0,0,0.2);
-    }
-
-    .character-card:hover .hover-info {
-      display: block;
-    }
-
-    .tags {
-      font-size: 0.9em;
-      color: #444;
-      margin-bottom: 10px;
-    }
-
-    .rank-input {
-      width: 60px;
-      padding: 4px;
-      text-align: center;
-    }
-   .rarity {
-     margin-top: 10px;
-     font-size: 1.2em;
-   }
-   .star {
-    cursor: pointer;
-    color: #bbb; /* cor da estrela apagada */
-    transition: color 0.2s;
-   }
-  .star.active {
-   color: gold; /* estrela preenchida */
-   }
-  </style>
-</head>
-<body>
-  <h1>Lista de Personagens</h1>
-
-  <div class="filters">
-    <div class="filter-group">
-      <h3>Aparência</h3>
-      <label><input type="checkbox" value="Kemonomimi" /> Kemonomimi</label>
-      <label><input type="checkbox" value="Shorts" /> Shorts</label>
-      <label><input type="checkbox" value="Small boobs" /> Small boobs</label>
-      <label><input type="checkbox" value="Big boobs" /> Big boobs</label>
-      <label><input type="checkbox" value="Huge boobs" /> Huge boobs</label>
-      <label><input type="checkbox" value="Blonde" /> Blonde</label>
-      <label><input type="checkbox" value="Pink hair" /> Pink hair</label>
-      <label><input type="checkbox" value="Brown hair" /> Brown hair</label>
-      <label><input type="checkbox" value="Black hair" /> Black hair</label>
-      <label><input type="checkbox" value="Red hair" /> Red hair</label>
-      <label><input type="checkbox" value="Green hair" /> Green hair</label>
-      <label><input type="checkbox" value="Blue hair" /> Blue hair</label>
-      <label><input type="checkbox" value="White hair" /> White hair</label>
-      <label><input type="checkbox" value="Orange hair" /> Orange hair</label>
-      <label><input type="checkbox" value="Purple hair" /> Purple hair</label>
-      <label><input type="checkbox" value="Short hair" /> Short hair</label>
-      <label><input type="checkbox" value="Long hair" /> Long hair</label>
-      <label><input type="checkbox" value="Witch hat" /> Witch hat</label>
-      <label><input type="checkbox" value="Maid" /> Maid</label>
-      <label><input type="checkbox" value="Kimono" /> Kimono</label>
-      <label><input type="checkbox" value="Glasses" /> Glasses</label>
-      <label><input type="checkbox" value="Overalls" /> Overalls</label>
-      <label><input type="checkbox" value="Pointy ears" /> Pointy ears</label>
-      <label><input type="checkbox" value="Tanned" /> Tanned</label>
-      <label><input type="checkbox" value="Skirt" /> Skirt</label>    
-    </div>
-    <div class="filter-group">
-      <h3>Traço</h3>
-      <label><input type="checkbox" value="Shy" /> Shy</label>
-      <label><input type="checkbox" value="Kuudere" /> Kuudere</label>
-      <label><input type="checkbox" value="Tsundere" /> Tsundere</label>
-      <label><input type="checkbox" value="Mommy" /> Mommy</label>
-      <label><input type="checkbox" value="Loli" /> Loli</label>
-      <label><input type="checkbox" value="Femboy" /> Femboy</label>  
-    </div>
-    <div class="filter-group">
-      <h3>Mídia</h3>
-      <label><input type="checkbox" value="Anime" /> Anime</label>
-      <label><input type="checkbox" value="Game" /> Game</label>
-      <label><input type="checkbox" value="Gacha" /> Gacha</label>
-      <label><input type="checkbox" value="Hoyo" /> Hoyoverse</label>
-      <label><input type="checkbox" value="Vtuber" /> Vtuber</label>
-    </div>
-    <div class="filter-group">
-      <h3>Série</h3>
-      <label><input type="checkbox" value="ZZZ" /> ZZZ</label>
-      <label><input type="checkbox" value="Bocchi the rock!" /> Bocchi the rock!</label>
-      <label><input type="checkbox" value="Touhou" /> Touhou</label>
-      <label><input type="checkbox" value="Danganronpa" /> Danganronpa</label>
-      <label><input type="checkbox" value="Milgram" /> Milgram</label>
-      <label><input type="checkbox" value="Code geass" /> Code geass</label>
-      <label><input type="checkbox" value="Gotobun" /> Gotobun</label>
-      <label><input type="checkbox" value="HxH" /> HxH</label>
-      <label><input type="checkbox" value="Naruto" /> Naruto</label>
-      <label><input type="checkbox" value="One Piece" /> One Piece</label>
-      <label><input type="checkbox" value="Genshin Impact" /> Genshin Impact</label>
-      <label><input type="checkbox" value="Chainsaw Man" /> Chainsaw Man</label>
-      <label><input type="checkbox" value="Shingeki" /> Shingeki</label>
       <label><input type="checkbox" value="Kaguya-sama" /> Kaguya-sama</label>
       <label><input type="checkbox" value="Hololive" /> Hololive</label>
       <label><input type="checkbox" value="NIJISANJI" /> NIJISANJI</label>
@@ -177,7 +9,6 @@
       <label><input type="checkbox" value="YTTD" /> YTTD</label>
       <label><input type="checkbox" value="Zero Escape" /> Zero Escape</label>
       <label><input type="checkbox" value="Pokémon" /> Pokémon</label>
-      <label><input type="checkbox" value="NIKKE" /> NIKKE</label>
   </div>
 
   <div class="sort-controls">
@@ -769,19 +600,18 @@
     characters.forEach(char => {
       const saved = savedRanks[char.name];
       char.rank = Number.isInteger(saved) ? saved : char.rank;
-      char.smell = savedRanks["smell_" + char.name] || 0;
-      char.noise = savedRanks["noise_" + char.name] || 0;
-      char.frequency = savedRanks["frequency_" + char.name] || 0;
+      const savedRarity = savedRanks["rarity_" + char.name];
+      if (Number.isInteger(savedRarity)) char.rarity = savedRarity;
     });
 
     const characterList = document.getElementById("characterList");
     const checkboxes = document.querySelectorAll(".filters input");
-    
+
     function renderCharacters() {
       const selectedTags = Array.from(checkboxes)
         .filter(cb => cb.checked)
         .map(cb => cb.value);
-      
+
       characterList.innerHTML = "";
 
       characters.forEach((char, index) => {
@@ -790,7 +620,7 @@
         const card = document.createElement("div");
         card.className = "character-card";
 
-                card.innerHTML = `
+        card.innerHTML = `
           <img src="${char.image}" alt="${char.name}">
           <h3>${char.name}</h3>
           <div class="hover-info">
@@ -800,49 +630,31 @@
                 <input type="number" class="rank-input" value="${char.rank}" data-index="${index}" />
               </label>
             </div>
-            <div class="rating-block" data-index="${index}">
-              <div class="rarity-group">
-                <strong>Smell:</strong>
-                ${[1, 2, 3, 4, 5].map(n => `
-                  <span class="star smell${n <= (char.smell || 0) ? ' active' : ''}" data-type="smell" data-star="${n}">&#9733;</span>
-                `).join("")}
-              </div>
-              <div class="rarity-group">
-                <strong>Noise:</strong>
-                ${[1, 2, 3, 4, 5].map(n => `
-                  <span class="star noise${n <= (char.noise || 0) ? ' active' : ''}" data-type="noise" data-star="${n}">&#9733;</span>
-                `).join("")}
-              </div>
-              <div class="rarity-group">
-                <strong>Frequency:</strong>
-                ${[1, 2, 3, 4, 5].map(n => `
-                  <span class="star frequency${n <= (char.frequency || 0) ? ' active' : ''}" data-type="frequency" data-star="${n}">&#9733;</span>
-                `).join("")}
-              </div>
+            <div class="rarity" data-index="${index}">
+               <strong>Smell:</strong>
+               ${[1, 2, 3, 4, 5].map(n => `
+                 <span class="star${n <= char.rarity ? ' active' : ''}" data-star="${n}">&#9733;</span>
+               `).join("")}
             </div>
-          </div>
-        `;
+          </div>`;
 
         characterList.appendChild(card);
 
         // Interatividade de estrelas
-        // Interatividade de estrelas
-const ratingBlock = card.querySelector(".rating-block");
-const i = index;
-const stars = ratingBlock.querySelectorAll(".star");
+        const rarityDiv = card.querySelector(".rarity");
+        const i = parseInt(rarityDiv.getAttribute("data-index"));
+        const stars = rarityDiv.querySelectorAll(".star");
 
-stars.forEach(star => {
-  star.addEventListener("click", () => {
-    const type = star.getAttribute("data-type");
-    const value = parseInt(star.getAttribute("data-star"));
-
-    characters[i][type] = value;
-    savedRanks[`${type}_${characters[i].name}`] = value;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-    renderCharacters();
-  });
-});
-
+        stars.forEach((star, idx) => {
+          star.addEventListener("click", () => {
+            characters[i].rarity = idx + 1;
+            savedRanks[characters[i].name] = characters[i].rank;
+            savedRanks["rarity_" + characters[i].name] = characters[i].rarity;
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+            renderCharacters();
+          });
+        });
+      });
 
       document.querySelectorAll(".rank-input").forEach(input => {
         input.addEventListener("blur", (e) => {
