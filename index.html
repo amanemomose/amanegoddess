@@ -916,7 +916,7 @@
 } else {
   for (let r = newRank; r > currentRank; r--) {
     const targetData = rankSnapshot.find(c => c.rank === r);
-    if (!targetData) continue; // <- pula se não achar
+    if (!targetData) continue;
 
     const target = characters.find(c => c.name === targetData.name);
     if (target) {
@@ -926,24 +926,24 @@
   }
 }
 
-          characters[i].rank = newRank;
-          savedRanks[characters[i].name] = newRank;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-
-          if (typeof currentSortOrder !== "undefined") {
-            sortByRank(currentSortOrder);
-          } else {
-            renderCharacters();
-          }
+characters[i].rank = newRank;
+savedRanks[characters[i].name] = newRank;
+localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+renderCharacters();
         });
       });
-    }
+    });
+  }
 
-    function sortByRank(order = 'asc') {
-      currentSortOrder = order;
-      characters.sort((a, b) => order === 'asc' ? a.rank - b.rank : b.rank - a.rank);
-      renderCharacters();
-    }
+  renderCharacters();
+
+  function sortByRank(direction) {
+    characters.sort((a, b) => {
+      if (direction === "asc") return a.rank - b.rank;
+      else return b.rank - a.rank;
+    });
+    renderCharacters();
+  }
 
     checkboxes.forEach(cb => cb.addEventListener("change", renderCharacters));
     renderCharacters();
