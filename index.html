@@ -89,26 +89,35 @@
       padding: 4px;
       text-align: center;
     }
-   .rarity {
-     margin-top: 10px;
-     font-size: 1.2em;
-   }
-   .star {
-    cursor: pointer;
-    color: #bbb; /* cor da estrela apagada */
-    transition: color 0.2s;
-   }
+
+    .rating-group {
+      margin-top: 10px;
+    }
+
+    .rating-group strong {
+      display: block;
+      margin-bottom: 5px;
+    }
+
+    .star {
+      cursor: pointer;
+      color: #bbb;
+      font-size: 20px;
+      display: inline-block;
+      width: 12px;
+      position: relative;
+    }
+
     .star.full {
       color: gold;
     }
+
     .star.half::before {
-      content: "★";
-      color: gold;
+      content: '\2605';
       position: absolute;
-      left: 0;
       width: 50%;
       overflow: hidden;
-      pointer-events: none;
+      color: gold;
     }
   </style>
 </head>
@@ -774,83 +783,39 @@
         rank: 0
       }
     ];
-    characters.forEach(char => {
-      if (char.smell === undefined) char.smell = 0;
-      if (char.noise === undefined) char.noise = 0;
-      if (char.frequency === undefined) char.frequency = 0;
-    });
         // Carrega rankings salvos do localStorage
     const savedRanks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     characters.forEach(char => {
       const saved = savedRanks[char.name];
       char.rank = Number.isInteger(saved) ? saved : char.rank;
-      const savedSmell = savedRanks["smell_" + char.name];
-      if (savedSmell !== undefined) char.smell = savedSmell;
-      const savedNoise = savedRanks["noise_" + char.name];
-      if (savedNoise !== undefined) char.noise = savedNoise;
-      const savedFrequency = savedRanks["frequency_" + char.name];
-      if (savedFrequency !== undefined) char.frequency = savedFrequency;
+      char.smell = savedRanks[`smell_${char.name}`] || 0;
+      char.noise = savedRanks[`noise_${char.name}`] || 0;
+      char.frequency = savedRanks[`frequency_${char.name}`] || 0;
     });
 
     const characterList = document.getElementById("characterList");
     const checkboxes = document.querySelectorAll(".filters input");
 
-    function createStarsHTML(category, value, index) {
-      // value pode ser 0 a 10 (cada 0.5 é meio ponto)
-      // Ex: 7 => 3.5 estrelas
-      // Vamos guardar valor como int 0 a 10, onde 1 = meia estrela
-      let html = '';
-      for(let i = 1; i <= 5; i++) {
-        const starValue = i * 2;
-        if (value >= starValue) {
-          // estrela cheia
-          html += `<span class="star full" data-category="${category}" data-index="${index}" data-value="${starValue}">&#9733;</span>`;
-        } else if (value === starValue - 1) {
-          // meia estrela
-          html += `<span class="star half" data-category="${category}" data-index="${index}" data-value="${starValue - 1}">&#9733;</span>`;
-        } else {
-          // apagada
-          html += `<span class="star" data-category="${category}" data-index="${index}" data-value="${starValue - 1}">&#9733;</span>`;
-        }
+    function renderRatingGroup(label, value, key, charIndex) {
+      let html = `<div class="rating-group" data-key="${key}" data-index="${charIndex}">
+        <strong>${label}:</strong>`;
+      for (let i = 1; i <= 10; i++) {
+        const isFull = i <= value * 2;
+        const isHalf = i === Math.ceil(value * 2);
+        html += `<span class="star${isFull ? ' full' : isHalf ? ' half' : ''}" data-value="${i / 2}">&#9733;</span>`;
       }
+      html += `</div>`;
       return html;
     }
-    function addStarEvents() {
-  document.querySelectorAll(".rarity-stars .star").forEach(star => {
-    star.addEventListener("click", (e) => {
-      const category = star.getAttribute("data-category");
-      const index = parseInt(star.getAttribute("data-index"));
-      const starValue = parseInt(star.getAttribute("data-value"));
-
-      const rect = star.getBoundingClientRect();
-      const clickX = e.clientX - rect.left;
-      const isHalf = clickX < rect.width / 2;
-
-      let newValue = isHalf ? starValue - 1 : starValue;
-
-      characters[index][category] = newValue;
-
-      savedRanks[category + "_" + characters[index].name] = newValue;
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-
-      renderCharacters(); // Vai re-renderizar tudo
-      addStarEvents();    // PRECISA reatribuir os eventos novamente
-    });
-  });
-}
+    
     function renderCharacters() {
-      const selectedTags = Array.from(checkboxes)
-        .filter(cb => cb.checked)
-        .map(cb => cb.value);
-
-      characterList.innerHTML = "";
-
+      const selectedTags = Array.(document.querySelectorAll(".filters input")).filter(cb => cb.checked).map(cb => cb.value);
+      const container = document.getElementById("characterList");
+      container.innerHTML = "";
       characters.forEach((char, index) => {
-        if (selectedTags.length > 0 && !selectedTags.every(tag => char.tags.includes(tag))) return;
-
+        if (selectedTags.length && !selectedTags.every(tag => char.tags.includes(tag))) return;
         const card = document.createElement("div");
         card.className = "character-card";
-
         card.innerHTML = `
           <img src="${char.image}" alt="${char.name}">
           <h3>${char.name}</h3>
@@ -861,115 +826,45 @@
                 <input type="number" class="rank-input" value="${char.rank}" data-index="${index}" />
               </label>
             </div>
-
-            <div class="rarity-group">
-              <div class="rarity-label">Smell:</div>
-              <div class="rarity-stars" data-category="smell" data-index="${index}">
-                ${createStarsHTML("smell", char.smell, index)}
-              </div>
-            </div>
-            <div class="rarity-group">
-              <div class="rarity-label">Noise:</div>
-              <div class="rarity-stars" data-category="noise" data-index="${index}">
-                ${createStarsHTML("noise", char.noise, index)}
-              </div>
-            </div>
-            <div class="rarity-group">
-              <div class="rarity-label">Frequency:</div>
-              <div class="rarity-stars" data-category="frequency" data-index="${index}">
-                ${createStarsHTML("frequency", char.frequency, index)}
-                
-                addStarEvents(); // ativa eventos após renderização
-              </div>
-            </div>
-          </div>
+            ${renderRatingGroup("Smell", char.smell, "smell", index)}
+            ${renderRatingGroup("Noise", char.noise, "noise", index)}
+            ${renderRatingGroup("Frequency", char.frequency, "frequency", index)}
+          </div>`;
+        container.appendChild(card);
         `;
 
-        characterList.appendChild(card);
-
-        // Interatividade de estrelas
-          document.querySelectorAll(".rarity-stars .star").forEach(star => {
-        star.addEventListener("click", (e) => {
-          const category = star.getAttribute("data-category");
-          const index = parseInt(star.getAttribute("data-index"));
-          const starValue = parseInt(star.getAttribute("data-value"));
-
-          // Detecta clique na metade esquerda ou direita da estrela
-          // e ajusta para meia estrela (starValue -1) ou estrela cheia (starValue)
-          // Usa event.offsetX e largura do elemento
-          const rect = star.getBoundingClientRect();
-          const clickX = e.clientX - rect.left;
-          const isHalf = clickX < rect.width / 2;
-
-          let newValue = isHalf ? starValue - 1 : starValue;
-
-          // Atualiza o valor no personagem
-          characters[index][category] = newValue;
-
-          // Salva no localStorage
-          savedRanks[category + "_" + characters[index].name] = newValue;
+        document.querySelectorAll(".star").forEach(star => {
+        star.addEventListener("click", e => {
+          const parent = e.target.closest(".rating-group");
+          const key = parent.dataset.key;
+          const index = parseInt(parent.dataset.index);
+          const value = parseFloat(e.target.dataset.value);
+          characters[index][key] = value;
+          savedRanks[`${key}_${characters[index].name}`] = value;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-
-          // Re-renderiza para atualizar as estrelas
           renderCharacters();
         });
       });
 
       document.querySelectorAll(".rank-input").forEach(input => {
-        input.addEventListener("blur", (e) => {
-          const i = parseInt(e.target.getAttribute("data-index"));
+        input.addEventListener("blur", e => {
+          const i = parseInt(e.target.dataset.index);
           const newRank = parseInt(e.target.value);
           if (isNaN(newRank) || newRank < 0) return;
-
-          const currentRank = characters[i].rank;
-          if (newRank === currentRank) return;
-
-          const rankSnapshot = characters.map(c => ({ name: c.name, rank: c.rank }));
-
-          if (newRank < currentRank) {
-            for (let r = newRank; r < currentRank; r++) {
-             const targetData = rankSnapshot.find(c => c.rank === r);
-            if (!targetData) continue; // <- pula se não achar
-
-    const target = characters.find(c => c.name === targetData.name);
-    if (target) {
-      target.rank += 1;
-      savedRanks[target.name] = target.rank;
-    }
-  }
-} else {
-  for (let r = newRank; r > currentRank; r--) {
-    const targetData = rankSnapshot.find(c => c.rank === r);
-    if (!targetData) continue;
-
-    const target = characters.find(c => c.name === targetData.name);
-    if (target) {
-      target.rank -= 1;
-      savedRanks[target.name] = target.rank;
-    }
-  }
-}
-
-characters[i].rank = newRank;
-savedRanks[characters[i].name] = newRank;
-localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-renderCharacters();
+          characters[i].rank = newRank;
+          savedRanks[characters[i].name] = newRank;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+          renderCharacters();
         });
       });
-    });
-  }
+    }
 
-  renderCharacters();
+    function sortByRank(order = 'asc') {
+      characters.sort((a, b) => order === 'asc' ? a.rank - b.rank : b.rank - a.rank);
+      renderCharacters();
+    }
 
-  function sortByRank(direction) {
-    characters.sort((a, b) => {
-      if (direction === "asc") return a.rank - b.rank;
-      else return b.rank - a.rank;
-    });
-    renderCharacters();
-  }
-
-    checkboxes.forEach(cb => cb.addEventListener("change", renderCharacters));
+    document.querySelectorAll(".filters input").forEach(cb => cb.addEventListener("change", renderCharacters));
     renderCharacters();
   </script>
 </body>
