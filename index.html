@@ -565,12 +565,7 @@
       
     ];
 
-    <script>
-    const STORAGE_KEY = "characterRanks";
-
-    let characters = [...]; // mantém todos os personagens como estão
-
-    // Carrega rankings salvos do localStorage
+        // Carrega rankings salvos do localStorage
     const savedRanks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     characters.forEach(char => {
       if (savedRanks[char.name] !== undefined) {
@@ -614,31 +609,14 @@
       });
 
       document.querySelectorAll(".rank-input").forEach(input => {
-        input.addEventListener("change", (e) => {
+        input.addEventListener("input", (e) => {
           const i = parseInt(e.target.getAttribute("data-index"));
-          let newRank = parseInt(e.target.value);
-          if (isNaN(newRank)) return;
+          const val = parseFloat(e.target.value);
+          characters[i].rank = isNaN(val) ? 0 : val;
 
-          const currentRank = characters[i].rank;
-
-          // Se novo ranking for diferente
-          if (newRank !== currentRank) {
-            // Aumenta os ranks dos personagens afetados
-            characters.forEach((char, idx) => {
-              if (idx !== i && char.rank >= newRank) {
-                char.rank++;
-              }
-            });
-
-            characters[i].rank = newRank;
-          }
-
-          // Atualiza localStorage
-          characters.forEach(c => savedRanks[c.name] = c.rank);
+          // Salva no localStorage
+          savedRanks[characters[i].name] = characters[i].rank;
           localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-
-          // Re-renderiza
-          renderCharacters();
         });
       });
     }
