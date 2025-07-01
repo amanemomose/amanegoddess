@@ -98,9 +98,18 @@
     color: #bbb; /* cor da estrela apagada */
     transition: color 0.2s;
    }
-  .star.active {
-   color: gold; /* estrela preenchida */
-   }
+    .star.full {
+      color: gold;
+    }
+    .star.half::before {
+      content: "★";
+      color: gold;
+      position: absolute;
+      left: 0;
+      width: 50%;
+      overflow: hidden;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -177,6 +186,7 @@
       <label><input type="checkbox" value="YTTD" /> YTTD</label>
       <label><input type="checkbox" value="Zero Escape" /> Zero Escape</label>
       <label><input type="checkbox" value="Pokémon" /> Pokémon</label>
+      <label><input type="checkbox" value="Kemono Friends" /> Kemono Friends</label>
   </div>
 
   <div class="sort-controls">
@@ -195,7 +205,9 @@
         image: "fufu.png", // Caminho relativo
         tags: ["Kemonomimi", "ZZZ", "Game", "Gacha", "Shorts", "Long hair", "Orange hair", "Small boobs", "Game", "Hoyo"],
         rank: 0,
-        rarity: 3
+        smell: 0,
+        noise: 0,
+        frequency: 0
       },
       {
         name: "C.C.",
@@ -762,19 +774,48 @@
         rank: 0
       }
     ];
-
+    characters.forEach(char => {
+      if (char.smell === undefined) char.smell = 0;
+      if (char.noise === undefined) char.noise = 0;
+      if (char.frequency === undefined) char.frequency = 0;
+    });
         // Carrega rankings salvos do localStorage
     const savedRanks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     characters.forEach(char => {
       const saved = savedRanks[char.name];
       char.rank = Number.isInteger(saved) ? saved : char.rank;
-      const savedRarity = savedRanks["rarity_" + char.name];
-      if (Number.isInteger(savedRarity)) char.rarity = savedRarity;
+      const savedSmell = savedRanks["smell_" + char.name];
+      if (savedSmell !== undefined) char.smell = savedSmell;
+      const savedNoise = savedRanks["noise_" + char.name];
+      if (savedNoise !== undefined) char.noise = savedNoise;
+      const savedFrequency = savedRanks["frequency_" + char.name];
+      if (savedFrequency !== undefined) char.frequency = savedFrequency;
     });
 
     const characterList = document.getElementById("characterList");
     const checkboxes = document.querySelectorAll(".filters input");
 
+    function createStarsHTML(category, value, index) {
+      // value pode ser 0 a 10 (cada 0.5 é meio ponto)
+      // Ex: 7 => 3.5 estrelas
+      // Vamos guardar valor como int 0 a 10, onde 1 = meia estrela
+      let html = '';
+      for(let i = 1; i <= 5; i++) {
+        const starValue = i * 2;
+        if (value >= starValue) {
+          // estrela cheia
+          html += `<span class="star full" data-category="${category}" data-index="${index}" data-value="${starValue}">&#9733;</span>`;
+        } else if (value === starValue - 1) {
+          // meia estrela
+          html += `<span class="star half" data-category="${category}" data-index="${index}" data-value="${starValue - 1}">&#9733;</span>`;
+        } else {
+          // apagada
+          html += `<span class="star" data-category="${category}" data-index="${index}" data-value="${starValue - 1}">&#9733;</span>`;
+        }
+      }
+      return html;
+    }
+    
     function renderCharacters() {
       const selectedTags = Array.from(checkboxes)
         .filter(cb => cb.checked)
@@ -798,29 +839,55 @@
                 <input type="number" class="rank-input" value="${char.rank}" data-index="${index}" />
               </label>
             </div>
-            <div class="rarity" data-index="${index}">
-               <strong>Raridade:</strong>
-               ${[1, 2, 3, 4, 5].map(n => `
-                 <span class="star${n <= char.rarity ? ' active' : ''}" data-star="${n}">&#9733;</span>
-               `).join("")}
+
+            <div class="rarity-group">
+              <div class="rarity-label">Smell:</div>
+              <div class="rarity-stars" data-category="smell" data-index="${index}">
+                ${createStarsHTML("smell", char.smell, index)}
+              </div>
             </div>
-          </div>`;
+            <div class="rarity-group">
+              <div class="rarity-label">Noise:</div>
+              <div class="rarity-stars" data-category="noise" data-index="${index}">
+                ${createStarsHTML("noise", char.noise, index)}
+              </div>
+            </div>
+            <div class="rarity-group">
+              <div class="rarity-label">Frequency:</div>
+              <div class="rarity-stars" data-category="frequency" data-index="${index}">
+                ${createStarsHTML("frequency", char.frequency, index)}
+              </div>
+            </div>
+          </div>
+        `;
 
         characterList.appendChild(card);
 
         // Interatividade de estrelas
-        const rarityDiv = card.querySelector(".rarity");
-        const i = parseInt(rarityDiv.getAttribute("data-index"));
-        const stars = rarityDiv.querySelectorAll(".star");
+          document.querySelectorAll(".rarity-stars .star").forEach(star => {
+        star.addEventListener("click", (e) => {
+          const category = star.getAttribute("data-category");
+          const index = parseInt(star.getAttribute("data-index"));
+          const starValue = parseInt(star.getAttribute("data-value"));
 
-        stars.forEach((star, idx) => {
-          star.addEventListener("click", () => {
-            characters[i].rarity = idx + 1;
-            savedRanks[characters[i].name] = characters[i].rank;
-            savedRanks["rarity_" + characters[i].name] = characters[i].rarity;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-            renderCharacters();
-          });
+          // Detecta clique na metade esquerda ou direita da estrela
+          // e ajusta para meia estrela (starValue -1) ou estrela cheia (starValue)
+          // Usa event.offsetX e largura do elemento
+          const rect = star.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const isHalf = clickX < rect.width / 2;
+
+          let newValue = isHalf ? starValue - 1 : starValue;
+
+          // Atualiza o valor no personagem
+          characters[index][category] = newValue;
+
+          // Salva no localStorage
+          savedRanks[category + "_" + characters[index].name] = newValue;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+
+          // Re-renderiza para atualizar as estrelas
+          renderCharacters();
         });
       });
 
