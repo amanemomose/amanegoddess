@@ -195,8 +195,7 @@
         image: "fufu.png", // Caminho relativo
         tags: ["Kemonomimi", "ZZZ", "Game", "Gacha", "Shorts", "Long hair", "Orange hair", "Small boobs", "Game", "Hoyo"],
         rank: 0,
-        rarity: 3,
-        frequency: 3
+        rarity: 3
       },
       {
         name: "C.C.",
@@ -405,7 +404,7 @@
       {
         name: "Kobeni",
         image: "kobeni.png",
-        tags: ["Anime", "Brown hair", "Shy"],
+        tags: ["Chainsaw Man", "Anime", "Brown hair", "Shy"],
         rank: 0
       },
       {
@@ -771,8 +770,6 @@
       char.rank = Number.isInteger(saved) ? saved : char.rank;
       const savedRarity = savedRanks["rarity_" + char.name];
       if (Number.isInteger(savedRarity)) char.rarity = savedRarity;
-      const savedFrequency = savedRanks["frequency_" + char.name];
-      if (Number.isInteger(savedFrequency)) char.frequency = savedFrequency;
     });
 
     const characterList = document.getElementById("characterList");
@@ -807,12 +804,6 @@
                  <span class="star${n <= char.rarity ? ' active' : ''}" data-star="${n}">&#9733;</span>
                `).join("")}
             </div>
-            <div class="frequency" data-index="${index}">
-               <strong>Frequency:</strong>
-               ${[1, 2, 3, 4, 5].map(n => `
-                 <span class="star${n <= char.frequency ? ' active' : ''}" data-star="${n}">&#9733;</span>
-               `).join("")}
-            </div>
           </div>`;
 
         characterList.appendChild(card);
@@ -831,21 +822,8 @@
             renderCharacters();
           });
         });
-        const frequencyDiv = card.querySelector(".frequency");
-        const i = parseInt(frequencyDiv.getAttribute("data-index"));
-        const stars = frequencyDiv.querySelectorAll(".star");
-
-        stars.forEach((star, idx) => {
-          star.addEventListener("click", () => {
-            characters[i].frequency = idx + 1;
-            savedRanks[characters[i].name] = characters[i].rank;
-            savedRanks["frequency_" + characters[i].name] = characters[i].frequency;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-            renderCharacters();
-            });
-        });
       });
-    
+
       document.querySelectorAll(".rank-input").forEach(input => {
         input.addEventListener("blur", (e) => {
           const i = parseInt(e.target.getAttribute("data-index"));
