@@ -645,12 +645,13 @@
     }
 
     function sortByRank(order = 'asc') {
-      characters.sort((a, b) => {
-        if (order === 'asc') return a.rank - b.rank;
-        else return b.rank - a.rank;
-      });
-      renderCharacters();
-    }
+  currentSortOrder = order; // Salva a ordem atual
+  characters.sort((a, b) => {
+    if (order === 'asc') return a.rank - b.rank;
+    else return b.rank - a.rank;
+  });
+  renderCharacters();
+}
 
     checkboxes.forEach(cb => cb.addEventListener("change", renderCharacters));
     renderCharacters();
