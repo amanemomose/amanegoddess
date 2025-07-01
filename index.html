@@ -609,28 +609,44 @@
       });
 
       document.querySelectorAll(".rank-input").forEach(input => {
-  input.addEventListener("input", (e) => {
-    const i = parseInt(e.target.getAttribute("data-index"));
-    const newRank = parseInt(e.target.value);
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      const i = parseInt(e.target.getAttribute("data-index"));
+      const newRank = parseInt(e.target.value);
 
-    if (isNaN(newRank)) return;
+      if (isNaN(newRank)) return;
 
-    const oldRank = characters[i].rank;
+      const currentRanks = characters.map((c, idx) => ({ idx, rank: c.rank }));
+      const oldRank = characters[i].rank;
 
-    if (newRank !== oldRank) {
-      // Atualiza os outros personagens com rank maior ou igual ao novoRank
-      characters.forEach((char, j) => {
-        if (j !== i && char.rank >= newRank) {
-          char.rank += 1;
-          savedRanks[char.name] = char.rank;
+      if (newRank === oldRank) return;
+
+      // Só queremos alterar se o novo rank já existir em outro personagem
+      const affected = currentRanks
+        .filter(c => c.idx !== i && c.rank >= newRank)
+        .sort((a, b) => a.rank - b.rank);
+
+      let usedRanks = new Set();
+      characters.forEach(c => usedRanks.add(c.rank));
+      if (usedRanks.has(newRank)) {
+        for (let c of affected) {
+          if (characters[c.idx].rank === newRank) {
+            characters[c.idx].rank += 1;
+            newRank++;
+          } else if (characters[c.idx].rank === newRank) {
+            characters[c.idx].rank += 1;
+            newRank++;
+          } else {
+            break;
+          }
+          savedRanks[characters[c.idx].name] = characters[c.idx].rank;
         }
-      });
+      }
 
       characters[i].rank = newRank;
       savedRanks[characters[i].name] = newRank;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-
-      sortByRank(); // Atualiza a renderização com ordenação
+      sortByRank(); // Reordena após ajuste
     }
   });
 });
