@@ -196,6 +196,7 @@
       <label><input type="checkbox" value="Zero Escape" /> Zero Escape</label>
       <label><input type="checkbox" value="Pokémon" /> Pokémon</label>
       <label><input type="checkbox" value="Kemono Friends" /> Kemono Friends</label>
+      <label><input type="checkbox" value="NIKKE" /> NIKKE</label>
   </div>
 
   <div class="sort-controls">
@@ -809,63 +810,69 @@
     }
     
     function renderCharacters() {
-      const selectedTags = Array.(document.querySelectorAll(".filters input")).filter(cb => cb.checked).map(cb => cb.value);
-      const container = document.getElementById("characterList");
-      container.innerHTML = "";
-      characters.forEach((char, index) => {
-        if (selectedTags.length && !selectedTags.every(tag => char.tags.includes(tag))) return;
-        const card = document.createElement("div");
-        card.className = "character-card";
-        card.innerHTML = `
-          <img src="${char.image}" alt="${char.name}">
-          <h3>${char.name}</h3>
-          <div class="hover-info">
-            <div class="tags"><strong>Tags:</strong> ${char.tags.join(", ")}</div>
-            <div>
-              <label>Ranking:
-                <input type="number" class="rank-input" value="${char.rank}" data-index="${index}" />
-              </label>
-            </div>
-            ${renderRatingGroup("Smell", char.smell, "smell", index)}
-            ${renderRatingGroup("Noise", char.noise, "noise", index)}
-            ${renderRatingGroup("Frequency", char.frequency, "frequency", index)}
-          </div>`;
-        container.appendChild(card);
-        `;
+  const selectedTags = Array.from(document.querySelectorAll(".filters input"))
+    .filter(cb => cb.checked)
+    .map(cb => cb.value);
 
-        document.querySelectorAll(".star").forEach(star => {
-        star.addEventListener("click", e => {
-          const parent = e.target.closest(".rating-group");
-          const key = parent.dataset.key;
-          const index = parseInt(parent.dataset.index);
-          const value = parseFloat(e.target.dataset.value);
-          characters[index][key] = value;
-          savedRanks[`${key}_${characters[index].name}`] = value;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-          renderCharacters();
-        });
-      });
+  const container = document.getElementById("characterList");
+  container.innerHTML = "";
 
-      document.querySelectorAll(".rank-input").forEach(input => {
-        input.addEventListener("blur", e => {
-          const i = parseInt(e.target.dataset.index);
-          const newRank = parseInt(e.target.value);
-          if (isNaN(newRank) || newRank < 0) return;
-          characters[i].rank = newRank;
-          savedRanks[characters[i].name] = newRank;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-          renderCharacters();
-        });
-      });
-    }
+  characters.forEach((char, index) => {
+    if (selectedTags.length && !selectedTags.every(tag => char.tags.includes(tag))) return;
 
-    function sortByRank(order = 'asc') {
-      characters.sort((a, b) => order === 'asc' ? a.rank - b.rank : b.rank - a.rank);
+    const card = document.createElement("div");
+    card.className = "character-card";
+    card.innerHTML = `
+      <img src="${char.image}" alt="${char.name}">
+      <h3>${char.name}</h3>
+      <div class="hover-info">
+        <div class="tags"><strong>Tags:</strong> ${char.tags.join(", ")}</div>
+        <div>
+          <label>Ranking:
+            <input type="number" class="rank-input" value="${char.rank}" data-index="${index}" />
+          </label>
+        </div>
+        ${renderRatingGroup("Smell", char.smell, "smell", index)}
+        ${renderRatingGroup("Noise", char.noise, "noise", index)}
+        ${renderRatingGroup("Frequency", char.frequency, "frequency", index)}
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  document.querySelectorAll(".star").forEach(star => {
+    star.addEventListener("click", e => {
+      const parent = e.target.closest(".rating-group");
+      const key = parent.dataset.key;
+      const index = parseInt(parent.dataset.index);
+      const value = parseFloat(e.target.dataset.value);
+      characters[index][key] = value;
+      savedRanks[`${key}_${characters[index].name}`] = value;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
       renderCharacters();
-    }
+    });
+  });
 
-    document.querySelectorAll(".filters input").forEach(cb => cb.addEventListener("change", renderCharacters));
-    renderCharacters();
+  document.querySelectorAll(".rank-input").forEach(input => {
+    input.addEventListener("blur", e => {
+      const i = parseInt(e.target.dataset.index);
+      const newRank = parseInt(e.target.value);
+      if (isNaN(newRank) || newRank < 0) return;
+      characters[i].rank = newRank;
+      savedRanks[characters[i].name] = newRank;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+      renderCharacters();
+    });
+  });
+}
+
+function sortByRank(order = 'asc') {
+  characters.sort((a, b) => order === 'asc' ? a.rank - b.rank : b.rank - a.rank);
+  renderCharacters();
+}
+
+document.querySelectorAll(".filters input").forEach(cb => cb.addEventListener("change", renderCharacters));
+renderCharacters();
   </script>
 </body>
 </html>
