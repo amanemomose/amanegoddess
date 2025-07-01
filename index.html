@@ -608,24 +608,34 @@
         characterList.appendChild(card);
       });
 
-      let currentSortOrder = 'asc'; // Salva a ordem atual para reordenar após atualização
+      function adjustRanks(targetIndex, newRank) {
+  const usedRanks = new Set();
 
-document.querySelectorAll(".rank-input").forEach(input => {
-        input.addEventListener("blur", (e) => {
-          const i = parseInt(e.target.getAttribute("data-index"));
-          const val = parseInt(e.target.value);
+  // Mapeia os ranks atuais
+  characters.forEach((char, idx) => {
+    if (idx !== targetIndex) {
+      usedRanks.add(char.rank);
+    }
+  });
 
-          if (!isNaN(val)) {
-            adjustRanks(i, val);
-            characters.forEach(c => savedRanks[c.name] = c.rank);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-            sortByRank("asc");
-          }
-        });
-      });
-    }
-      
-    }
+  // Se o rank já estiver em uso, empurra os ranks acima
+  if (usedRanks.has(newRank)) {
+    // Ordena por ranking ascendente
+    characters.sort((a, b) => a.rank - b.rank);
+
+    // Empurra personagens com ranking maior ou igual ao novoRank
+    characters.forEach((char, idx) => {
+      if (idx !== targetIndex && char.rank >= newRank) {
+        char.rank += 1;
+        savedRanks[char.name] = char.rank;
+      }
+    });
+  }
+
+  // Atualiza o personagem alvo por último (para evitar sobrescrever por acidente)
+  characters[targetIndex].rank = newRank;
+  savedRanks[characters[targetIndex].name] = newRank;
+}
 
     function sortByRank(order = 'asc') {
   currentSortOrder = order; // Salva a ordem atual
