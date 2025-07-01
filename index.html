@@ -195,7 +195,9 @@
         image: "fufu.png", // Caminho relativo
         tags: ["Kemonomimi", "ZZZ", "Game", "Gacha", "Shorts", "Long hair", "Orange hair", "Small boobs", "Game", "Hoyo"],
         rank: 0,
-        rarity: 3
+        rarity: 3,
+        noise: 3,
+        frequency: 3
       },
       {
         name: "C.C.",
@@ -770,6 +772,10 @@
       char.rank = Number.isInteger(saved) ? saved : char.rank;
       const savedRarity = savedRanks["rarity_" + char.name];
       if (Number.isInteger(savedRarity)) char.rarity = savedRarity;
+      const savedNoise = savedRanks["noise_" + char.name];
+      if (Number.isInteger(savedNoise)) char.noise = savedNoise;
+     const savedFreq = savedRanks["frequency_" + char.name];
+      if (Number.isInteger(savedFreq)) char.frequency = savedFreq;
     });
 
     const characterList = document.getElementById("characterList");
@@ -804,6 +810,18 @@
                  <span class="star${n <= char.rarity ? ' active' : ''}" data-star="${n}">&#9733;</span>
                `).join("")}
             </div>
+            <div class="noise" data-index="${index}">
+               <strong>Noise:</strong>
+               ${[1, 2, 3, 4, 5].map(n => `
+                 <span class="star${n <= char.noise ? ' active' : ''}" data-star="${n}">&#9733;</span>
+               `).join("")}
+           </div>
+          <div class="frequency" data-index="${index}">
+              <strong>Frequency:</strong>
+              ${[1, 2, 3, 4, 5].map(n => `
+               <span class="star${n <= char.frequency ? ' active' : ''}" data-star="${n}">&#9733;</span>
+              `).join("")}
+          </div>
           </div>`;
 
         characterList.appendChild(card);
@@ -823,6 +841,34 @@
           });
         });
       });
+
+      // Noise stars
+const noiseDiv = card.querySelector(".noise");
+const noiseIndex = parseInt(noiseDiv.getAttribute("data-index"));
+const noiseStars = noiseDiv.querySelectorAll(".star");
+
+noiseStars.forEach((star, idx) => {
+  star.addEventListener("click", () => {
+    characters[noiseIndex].noise = idx + 1;
+    savedRanks["noise_" + characters[noiseIndex].name] = idx + 1;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+    renderCharacters();
+  });
+});
+
+// Frequency stars
+const freqDiv = card.querySelector(".frequency");
+const freqIndex = parseInt(freqDiv.getAttribute("data-index"));
+const freqStars = freqDiv.querySelectorAll(".star");
+
+freqStars.forEach((star, idx) => {
+  star.addEventListener("click", () => {
+    characters[freqIndex].frequency = idx + 1;
+    savedRanks["frequency_" + characters[freqIndex].name] = idx + 1;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+    renderCharacters();
+  });
+});
 
       document.querySelectorAll(".rank-input").forEach(input => {
         input.addEventListener("blur", (e) => {
