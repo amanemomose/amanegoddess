@@ -768,8 +768,9 @@
     characters.forEach(char => {
       const saved = savedRanks[char.name];
       char.rank = Number.isInteger(saved) ? saved : char.rank;
-      const savedRarity = savedRanks["rarity_" + char.name];
-      if (Number.isInteger(savedRarity)) char.rarity = savedRarity;
+      char.smell = savedRanks["smell_" + char.name] || 0;
+      char.noise = savedRanks["noise_" + char.name] || 0;
+      char.frequency = savedRanks["frequency_" + char.name] || 0;
     });
 
     const characterList = document.getElementById("characterList");
@@ -779,7 +780,7 @@
       const selectedTags = Array.from(checkboxes)
         .filter(cb => cb.checked)
         .map(cb => cb.value);
-
+      
       characterList.innerHTML = "";
 
       characters.forEach((char, index) => {
@@ -817,25 +818,28 @@
       <span class="star frequency${n <= (char.frequency || 0) ? ' active' : ''}" data-type="frequency" data-star="${n}">&#9733;</span>
     `).join("")}
   </div>
-</div>;
+</div>
 
         characterList.appendChild(card);
 
         // Interatividade de estrelas
-        const rarityDiv = card.querySelector(".rarity");
-        const i = parseInt(rarityDiv.getAttribute("data-index"));
-        const stars = rarityDiv.querySelectorAll(".star");
+        // Interatividade de estrelas
+const ratingBlock = card.querySelector(".rating-block");
+const i = index;
+const stars = ratingBlock.querySelectorAll(".star");
 
-        stars.forEach((star, idx) => {
-          star.addEventListener("click", () => {
-            characters[i].rarity = idx + 1;
-            savedRanks[characters[i].name] = characters[i].rank;
-            savedRanks["rarity_" + characters[i].name] = characters[i].rarity;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-            renderCharacters();
-          });
-        });
-      });
+stars.forEach(star => {
+  star.addEventListener("click", () => {
+    const type = star.getAttribute("data-type");
+    const value = parseInt(star.getAttribute("data-star"));
+
+    characters[i][type] = value;
+    savedRanks[`${type}_${characters[i].name}`] = value;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+    renderCharacters();
+  });
+});
+
 
       document.querySelectorAll(".rank-input").forEach(input => {
         input.addEventListener("blur", (e) => {
