@@ -177,6 +177,7 @@
       <label><input type="checkbox" value="YTTD" /> YTTD</label>
       <label><input type="checkbox" value="Zero Escape" /> Zero Escape</label>
       <label><input type="checkbox" value="Pokémon" /> Pokémon</label>
+      <label><input type="checkbox" value="NIKKE" /> NIKKE</label>
   </div>
 
   <div class="sort-controls">
@@ -789,7 +790,7 @@
         const card = document.createElement("div");
         card.className = "character-card";
 
-        card.innerHTML = `
+                card.innerHTML = `
           <img src="${char.image}" alt="${char.name}">
           <h3>${char.name}</h3>
           <div class="hover-info">
@@ -800,25 +801,27 @@
               </label>
             </div>
             <div class="rating-block" data-index="${index}">
-  <div class="rarity-group">
-    <strong>Smell:</strong>
-    ${[1, 2, 3, 4, 5].map(n => `
-      <span class="star smell${n <= (char.smell || 0) ? ' active' : ''}" data-type="smell" data-star="${n}">&#9733;</span>
-    `).join("")}
-  </div>
-  <div class="rarity-group">
-    <strong>Noise:</strong>
-    ${[1, 2, 3, 4, 5].map(n => `
-      <span class="star noise${n <= (char.noise || 0) ? ' active' : ''}" data-type="noise" data-star="${n}">&#9733;</span>
-    `).join("")}
-  </div>
-  <div class="rarity-group">
-    <strong>Frequency:</strong>
-    ${[1, 2, 3, 4, 5].map(n => `
-      <span class="star frequency${n <= (char.frequency || 0) ? ' active' : ''}" data-type="frequency" data-star="${n}">&#9733;</span>
-    `).join("")}
-  </div>
-</div>
+              <div class="rarity-group">
+                <strong>Smell:</strong>
+                ${[1, 2, 3, 4, 5].map(n => `
+                  <span class="star smell${n <= (char.smell || 0) ? ' active' : ''}" data-type="smell" data-star="${n}">&#9733;</span>
+                `).join("")}
+              </div>
+              <div class="rarity-group">
+                <strong>Noise:</strong>
+                ${[1, 2, 3, 4, 5].map(n => `
+                  <span class="star noise${n <= (char.noise || 0) ? ' active' : ''}" data-type="noise" data-star="${n}">&#9733;</span>
+                `).join("")}
+              </div>
+              <div class="rarity-group">
+                <strong>Frequency:</strong>
+                ${[1, 2, 3, 4, 5].map(n => `
+                  <span class="star frequency${n <= (char.frequency || 0) ? ' active' : ''}" data-type="frequency" data-star="${n}">&#9733;</span>
+                `).join("")}
+              </div>
+            </div>
+          </div>
+        `;
 
         characterList.appendChild(card);
 
