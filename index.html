@@ -621,31 +621,30 @@ document.querySelectorAll(".rank-input").forEach(input => {
 
     if (newRank === currentRank) return;
 
-    // Detecta colisão e ajusta os rankings superiores
-    const sorted = characters
-      .map((c, idx) => ({ ...c, idx }))
-      .filter(c => c.idx !== i && c.rank >= newRank)
-      .sort((a, b) => b.rank - a.rank);
+    // Detecta colisão e ajusta os rankings
+    const takenRanks = characters.map(c => c.rank);
+    if (takenRanks.includes(newRank)) {
+      // Ordena do maior para o menor para evitar sobreposição reversa
+      const sorted = characters
+        .map((c, idx) => ({ ...c, idx }))
+        .filter(c => c.idx !== i && c.rank >= newRank)
+        .sort((a, b) => b.rank - a.rank);
 
-    sorted.forEach(c => {
-      characters[c.idx].rank += 1;
-      savedRanks[c.name] = characters[c.idx].rank;
-    });
+      sorted.forEach(c => {
+        characters[c.idx].rank += 1;
+        savedRanks[characters[c.name]] = characters[c.idx].rank;
+      });
+    }
 
-    // Atualiza o personagem que foi editado
+    // Atualiza o ranking do personagem alterado
     characters[i].rank = newRank;
     savedRanks[characters[i].name] = newRank;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
 
-    // Reordena automaticamente se estiver em modo de ordenação por ranking
-    if (currentSortOrder) {
-      sortByRank(currentSortOrder);
-    } else {
-      renderCharacters();
-    }
+    renderCharacters();
   });
 });
-
+      
     }
 
     function sortByRank(order = 'asc') {
