@@ -842,33 +842,29 @@
         });
       });
 
-      // Noise stars
-const noiseDiv = card.querySelector(".noise");
-const noiseIndex = parseInt(noiseDiv.getAttribute("data-index"));
-const noiseStars = noiseDiv.querySelectorAll(".star");
+      // Estrelas de Noise
+    const noiseDiv = card.querySelector(".noise");
+    const noiseStars = noiseDiv.querySelectorAll(".star");
+    noiseStars.forEach((star, idx) => {
+      star.addEventListener("click", () => {
+        characters[index].noise = idx + 1;
+        savedRanks["noise_" + characters[index].name] = idx + 1;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+        renderCharacters();
+      });
+    });
 
-noiseStars.forEach((star, idx) => {
-  star.addEventListener("click", () => {
-    characters[noiseIndex].noise = idx + 1;
-    savedRanks["noise_" + characters[noiseIndex].name] = idx + 1;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-    renderCharacters();
-  });
-});
-
-// Frequency stars
-const freqDiv = card.querySelector(".frequency");
-const freqIndex = parseInt(freqDiv.getAttribute("data-index"));
-const freqStars = freqDiv.querySelectorAll(".star");
-
-freqStars.forEach((star, idx) => {
-  star.addEventListener("click", () => {
-    characters[freqIndex].frequency = idx + 1;
-    savedRanks["frequency_" + characters[freqIndex].name] = idx + 1;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-    renderCharacters();
-  });
-});
+    // Estrelas de Frequency
+    const freqDiv = card.querySelector(".frequency");
+    const freqStars = freqDiv.querySelectorAll(".star");
+    freqStars.forEach((star, idx) => {
+      star.addEventListener("click", () => {
+        characters[index].frequency = idx + 1;
+        savedRanks["frequency_" + characters[index].name] = idx + 1;
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
+        renderCharacters();
+      });
+    });
 
       document.querySelectorAll(".rank-input").forEach(input => {
         input.addEventListener("blur", (e) => {
