@@ -568,10 +568,9 @@
         // Carrega rankings salvos do localStorage
     const savedRanks = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
     characters.forEach(char => {
-      if (savedRanks[char.name] !== undefined) {
-        char.rank = savedRanks[char.name];
-      }
-    });
+  const saved = savedRanks[char.name];
+  char.rank = Number.isInteger(saved) ? saved : char.rank;
+});
 
     const characterList = document.getElementById("characterList");
     const checkboxes = document.querySelectorAll(".filters input");
@@ -614,6 +613,8 @@
     const newRank = parseInt(e.target.value);
 
     if (isNaN(newRank)) return;
+
+    if (newRank < 0) return;
 
     const currentRank = characters[i].rank;
 
