@@ -904,23 +904,27 @@
 
           if (newRank < currentRank) {
             for (let r = newRank; r < currentRank; r++) {
-              const targetData = rankSnapshot.find(c => c.rank === r);
-              const target = characters.find(c => c.name === targetData?.name);
-              if (target) {
-                target.rank += 1;
-                savedRanks[target.name] = target.rank;
-              }
-            }
-          } else {
-            for (let r = newRank; r > currentRank; r--) {
-              const targetData = rankSnapshot.find(c => c.rank === r);
-              const target = characters.find(c => c.name === targetData?.name);
-              if (target) {
-                target.rank -= 1;
-                savedRanks[target.name] = target.rank;
-              }
-            }
-          }
+             const targetData = rankSnapshot.find(c => c.rank === r);
+            if (!targetData) continue; // <- pula se não achar
+
+    const target = characters.find(c => c.name === targetData.name);
+    if (target) {
+      target.rank += 1;
+      savedRanks[target.name] = target.rank;
+    }
+  }
+} else {
+  for (let r = newRank; r > currentRank; r--) {
+    const targetData = rankSnapshot.find(c => c.rank === r);
+    if (!targetData) continue; // <- pula se não achar
+
+    const target = characters.find(c => c.name === targetData.name);
+    if (target) {
+      target.rank -= 1;
+      savedRanks[target.name] = target.rank;
+    }
+  }
+}
 
           characters[i].rank = newRank;
           savedRanks[characters[i].name] = newRank;
