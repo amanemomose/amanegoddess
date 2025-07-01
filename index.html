@@ -612,41 +612,38 @@
     const i = parseInt(e.target.getAttribute("data-index"));
     const newRank = parseInt(e.target.value);
 
-    if (isNaN(newRank)) return;
-
-    if (newRank < 0) return;
+    if (isNaN(newRank) || newRank < 0) return;
 
     const currentRank = characters[i].rank;
-
     if (newRank === currentRank) return;
 
-    // Se novo rank for menor: empurra os intermediários para cima (rank++)
     if (newRank < currentRank) {
-      characters.forEach((c, idx) => {
-        if (idx !== i && c.rank >= newRank && c.rank < currentRank) {
-          c.rank += 1;
-          savedRanks[c.name] = c.rank;
+      for (let r = newRank; r < currentRank; r++) {
+        const target = characters.find(c => c.rank === r);
+        if (target) {
+          target.rank += 1;
+          savedRanks[target.name] = target.rank;
+        } else {
+          break;
         }
-      });
+      }
+    } else if (newRank > currentRank) {
+      for (let r = newRank; r > currentRank; r--) {
+        const target = characters.find(c => c.rank === r);
+        if (target) {
+          target.rank -= 1;
+          savedRanks[target.name] = target.rank;
+        } else {
+          break;
+        }
+      }
     }
 
-    // Se novo rank for maior: puxa os intermediários para baixo (rank--)
-    else if (newRank > currentRank) {
-      characters.forEach((c, idx) => {
-        if (idx !== i && c.rank <= newRank && c.rank > currentRank) {
-          c.rank -= 1;
-          savedRanks[c.name] = c.rank;
-        }
-      });
-    }
-
-    // Atualiza o personagem que foi editado
     characters[i].rank = newRank;
     savedRanks[characters[i].name] = newRank;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
 
-    // Reordena automaticamente se estiver ordenado
-    if (currentSortOrder) {
+    if (typeof currentSortOrder !== "undefined") {
       sortByRank(currentSortOrder);
     } else {
       renderCharacters();
