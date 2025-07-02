@@ -877,8 +877,8 @@
 
        noiseStars.forEach((star, idx) => {
            star.addEventListener("click", () => {
-            characters[j].noise = idx + 1;
-            savedRanks[characters[j].name] = characters[j].rank;
+           characters[j].noise = idx + 1;
+           savedRanks[characters[j].name] = characters[j].rank;
            savedRanks["noise_" + characters[j].name] = characters[j].noise;
            localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
            renderCharacters();
@@ -891,9 +891,9 @@
     frequencyStars.forEach((star, idx) => {
       star.addEventListener("click", () => {
         characters[k].frequency = idx + 1;
-        const savedRanks = JSON.parse(localStorage.getItem("savedRanks") || "{}");
+        savedRanks[characters[k].name] = characters[k].rank;
         savedRanks["frequency_" + characters[k].name] = characters[k].frequency;
-        localStorage.setItem("savedRanks", JSON.stringify(savedRanks));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
         renderCharacters();
       });
     });
