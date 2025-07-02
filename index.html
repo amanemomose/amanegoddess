@@ -903,35 +903,43 @@
         input.addEventListener("blur", (e) => {
           const i = parseInt(e.target.getAttribute("data-index"));
           const newRank = parseInt(e.target.value);
-          if (isNaN(newRank) || newRank < 0) return;
+          if (isNaN(newRank) || newRank < 1) return;
 
           const currentRank = characters[i].rank;
           if (newRank === currentRank) return;
 
-          const rankSnapshot = characters.map(c => ({ name: c.name, rank: c.rank }));
+          const targetChar = characters[i];
 
-          if (newRank < currentRank) {
-            for (let r = newRank; r < currentRank; r++) {
-              const targetData = rankSnapshot.find(c => c.rank === r);
-              const target = characters.find(c => c.name === targetData?.name);
-              if (target) {
-                target.rank += 1;
-                savedRanks[target.name] = target.rank;
-              }
+          // Remove o personagem atual da lista
+          const others = characters.filter((_, idx) => idx !== i);
+
+          // Insere novamente com a nova posição
+          others.sort((a, b) => a.rank - b.rank);
+
+          const newCharacters = [];
+          let inserted = false;
+          let counter = 1;
+
+          for (let char of others) {
+            if (counter === newRank && !inserted) {
+              targetChar.rank = counter++;
+              newCharacters.push(targetChar);
+              inserted = true;
             }
-          } else {
-            for (let r = newRank; r > currentRank; r--) {
-              const targetData = rankSnapshot.find(c => c.rank === r);
-              const target = characters.find(c => c.name === targetData?.name);
-              if (target) {
-                target.rank -= 1;
-                savedRanks[target.name] = target.rank;
-              }
-            }
+            char.rank = counter++;
+            newCharacters.push(char);
           }
 
-          characters[i].rank = newRank;
-          savedRanks[characters[i].name] = newRank;
+          if (!inserted) {
+            targetChar.rank = counter++;
+            newCharacters.push(targetChar);
+          }
+
+          characters = newCharacters;
+          characters.forEach(char => {
+            savedRanks[char.name] = char.rank;
+          });
+
           localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
 
           if (typeof currentSortOrder !== "undefined") {
