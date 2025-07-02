@@ -859,9 +859,9 @@
 
         frequencystars.forEach((star, idx) => {
           star.addEventListener("click", () => {
-            characters[k].frequency = idx + 1;
-            savedRanks[characters[k].name] = characters[k].rank;
-            savedRanks["frequency_" + characters[k].name] = characters[k].rarity;
+            characters[j].frequency = idx + 1;
+            savedRanks[characters[j].name] = characters[j].rank;
+            savedRanks["frequency_" + characters[j].name] = characters[j].rarity;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
             renderCharacters();
           });
