@@ -808,11 +808,11 @@
                `).join("")}
             </div>
             <div class="noise" data-index="${index}">
-              <strong>Noise:</strong>
-              ${[1, 2, 3, 4, 5].map(n => `
+               <strong>Noise:</strong>
+               ${[1, 2, 3, 4, 5].map(n => `
                  <span class="star${n <= char.noise ? ' active' : ''}" data-star="${n}">&#9733;</span>
-              `).join("")}
-           </div>
+               `).join("")}
+            </div>
           </div>`;
 
         characterList.appendChild(card);
