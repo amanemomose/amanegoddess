@@ -914,50 +914,35 @@
           const others = characters.filter((_, idx) => idx !== i);
 
           // Insere novamente com a nova posição
-          others.sort((a, b) => a.rank - b.rank);
+          others.splice(newRank - 1, 0, targetChar);
 
-          const newCharacters = [];
-          let inserted = false;
-          let counter = 1;
-
-          for (let char of others) {
-            if (counter === newRank && !inserted) {
-              targetChar.rank = counter++;
-              newCharacters.push(targetChar);
-              inserted = true;
-            }
-            char.rank = counter++;
-            newCharacters.push(char);
-          }
-
-          if (!inserted) {
-            targetChar.rank = counter++;
-            newCharacters.push(targetChar);
-          }
-
-          characters = newCharacters;
-          characters.forEach(char => {
+          // Atualiza os rankings
+          characters = others.map((char, idx) => {
+            char.rank = idx + 1;
             savedRanks[char.name] = char.rank;
+            savedRanks["rarity_" + char.name] = char.rarity;
+            savedRanks["noise_" + char.name] = char.noise;
+            savedRanks["frequency_" + char.name] = char.frequency;
+            return char;
           });
 
           localStorage.setItem(STORAGE_KEY, JSON.stringify(savedRanks));
-
-          if (typeof currentSortOrder !== "undefined") {
-            sortByRank(currentSortOrder);
-          } else {
-            renderCharacters();
-          }
+          renderCharacters();
         });
       });
     }
 
-    function sortByRank(order = 'asc') {
-      currentSortOrder = order;
-      characters.sort((a, b) => order === 'asc' ? a.rank - b.rank : b.rank - a.rank);
+    checkboxes.forEach(cb => cb.addEventListener("change", renderCharacters));
+
+    function sortByRank(order) {
+      characters.sort((a, b) => {
+        if (order === "asc") return a.rank - b.rank;
+        else return b.rank - a.rank;
+      });
       renderCharacters();
     }
 
-    checkboxes.forEach(cb => cb.addEventListener("change", renderCharacters));
+    // Inicializa com render
     renderCharacters();
   </script>
 </body>
