@@ -177,6 +177,7 @@
       <label><input type="checkbox" value="YTTD" /> YTTD</label>
       <label><input type="checkbox" value="Zero Escape" /> Zero Escape</label>
       <label><input type="checkbox" value="Pokémon" /> Pokémon</label>
+      label><input type="checkbox" value="NIKKE" /> NIKKE</label>
   </div>
 
   <div class="sort-controls">
@@ -196,7 +197,8 @@
         tags: ["Kemonomimi", "ZZZ", "Game", "Gacha", "Shorts", "Long hair", "Orange hair", "Small boobs", "Game", "Hoyo"],
         rank: 0,
         rarity: 3,
-        noise: 3
+        noise: 3,
+        frequency: 3
       },
       {
         name: "C.C.",
@@ -773,6 +775,8 @@
       if (Number.isInteger(savedRarity)) char.rarity = savedRarity;
       const savedNoise = savedRanks["noise_" + char.name];
       if (Number.isInteger(savedNoise)) char.noise = savedNoise;
+      const savedFrequency = savedRanks["frequency_" + char.name];
+      if (Number.isInteger(savedFrequency)) char.frequency = savedFrequency;
     });
 
     const characterList = document.getElementById("characterList");
@@ -813,7 +817,13 @@
                  <span class="star${n <= char.noise ? ' active' : ''}" data-star="${n}">&#9733;</span>
               `).join("")}
            </div>
-          </div>`;
+           <div class="frequency" data-index="${index}">
+          <strong>Frequency:</strong>
+          ${[1, 2, 3, 4, 5].map(n => `
+            <span class="star${n <= char.frequency ? ' active' : ''}" data-star="${n}">&#9733;</span>
+          `).join("")}
+        </div>
+    </div>`;
 
         characterList.appendChild(card);
 
@@ -833,7 +843,7 @@
         });
         const noiseDiv = card.querySelector(".noise");
         const j = parseInt(noiseDiv.getAttribute("data-index"));
-       const noiseStars = noiseDiv.querySelectorAll(".star");
+        const noiseStars = noiseDiv.querySelectorAll(".star");
 
        noiseStars.forEach((star, idx) => {
            star.addEventListener("click", () => {
@@ -844,8 +854,20 @@
            renderCharacters();
   });
 });
+    const frequencyDiv = card.querySelector(".frequency");
+    const k = parseInt(frequencyDiv.getAttribute("data-index"));
+    const frequencyStars = frequencyDiv.querySelectorAll(".star");
 
+    frequencyStars.forEach((star, idx) => {
+      star.addEventListener("click", () => {
+        characters[k].frequency = idx + 1;
+        const savedRanks = JSON.parse(localStorage.getItem("savedRanks") || "{}");
+        savedRanks["frequency_" + characters[k].name] = characters[k].frequency;
+        localStorage.setItem("savedRanks", JSON.stringify(savedRanks));
+        renderCharacters();
       });
+    });
+  });
 
       document.querySelectorAll(".rank-input").forEach(input => {
         input.addEventListener("blur", (e) => {
